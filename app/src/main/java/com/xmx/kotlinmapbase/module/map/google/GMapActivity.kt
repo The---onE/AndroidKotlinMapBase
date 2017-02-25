@@ -1,6 +1,5 @@
 package com.xmx.kotlinmapbase.module.map.google
 
-import android.app.Activity
 import android.os.Bundle
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
@@ -15,7 +14,7 @@ class GMapActivity : BaseTempActivity() {
         fragmentManager.findFragmentById(R.id.map) as MapFragment
     }
     // 谷歌地图对象句柄
-    var mGMap : GoogleMap? = null
+    var mGMap: GoogleMap? = null
 
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_gmap)
@@ -28,6 +27,7 @@ class GMapActivity : BaseTempActivity() {
             val tokyo = LatLng(35.7, 139.7)
             mGMap?.addMarker(MarkerOptions().position(tokyo).title("Marker in Tokyo"))
             mGMap?.moveCamera(CameraUpdateFactory.newLatLng(tokyo))
+            mGMap?.isMyLocationEnabled = true
         })
     }
 

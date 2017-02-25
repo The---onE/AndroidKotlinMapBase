@@ -7,73 +7,56 @@
     <!-- 震动权限 -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- LeanCloud基础模块 -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name="com.xmx.kotlinmapbase.core.MyApplication"
+        android:name=".core.MyApplication"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name="com.xmx.kotlinmapbase.core.activity.SplashActivity"
-            android:theme="@style/AppTheme.SplashBackground">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBUah2WAqdp3cIxiSd_4B86TP1HCzSPvjw" />
 
+        <activity
+            android:name=".core.activity.SplashActivity"
+            android:theme="@style/AppTheme.SplashBackground">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.xmx.kotlinmapbase.core.activity.MainActivity"
+            android:name=".core.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.xmx.kotlinmapbase.module.data.sql.SQLActivity"
+            android:name=".module.log.OperationLogActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.xmx.kotlinmapbase.module.data.cloud.CloudActivity"
+            android:name=".module.user.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.xmx.kotlinmapbase.module.data.sync.SyncActivity"
+            android:name=".module.user.RegisterActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.xmx.kotlinmapbase.module.log.ExceptionTestActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.log.OperationLogActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.user.LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.user.RegisterActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.web.NetworkWebActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.web.LocalVerticalWebActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.xmx.kotlinmapbase.module.web.LocalHorizontalWebActivity"
+            android:name=".module.map.google.GMapActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <service
-            android:name="com.xmx.kotlinmapbase.module.service.MainService"
-            android:enabled="true"
-            android:exported="true" />
 
         <!-- 实时通信模块、推送（若使用该功能，需添加以下声明）START -->
-        <service android:name="com.avos.avoscloud.PushService"/>
+        <service android:name="com.avos.avoscloud.PushService" />
+
         <receiver android:name="com.avos.avoscloud.AVBroadcastReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.USER_PRESENT"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>

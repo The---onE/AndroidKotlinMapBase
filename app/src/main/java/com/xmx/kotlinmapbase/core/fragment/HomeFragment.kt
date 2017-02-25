@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.xmx.kotlinmapbase.R
 import com.xmx.kotlinmapbase.module.log.OperationLogActivity
 import com.xmx.kotlinmapbase.base.fragment.BaseFragment
+import com.xmx.kotlinmapbase.module.map.google.GMapActivity
 import kotlinx.android.synthetic.main.fragment_home.*
 
 /**
@@ -24,6 +25,11 @@ class HomeFragment : BaseFragment() {
     }
 
     override fun setListener(view: View) {
+        // 谷歌地图
+        btnGMap.setOnClickListener {
+            startActivity(GMapActivity::class.java)
+        }
+
         // 查看日志
         btnShowOperationLog.setOnClickListener {
             startActivity(OperationLogActivity::class.java)

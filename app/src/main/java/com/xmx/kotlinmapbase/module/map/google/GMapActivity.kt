@@ -5,8 +5,6 @@ import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.xmx.kotlinmapbase.R
 import com.xmx.kotlinmapbase.common.map.gmap.BaseMapActivity
 import kotlinx.android.synthetic.main.activity_gmap.*
@@ -17,10 +15,6 @@ class GMapActivity : BaseMapActivity() {
     val mMapFragment by lazy {
         fragmentManager.findFragmentById(R.id.map) as MapFragment
     }
-
-    // 当前选定位置
-    var selectedPosition: LatLng? = null
-    var selectedMarker: Marker? = null
 
     // 选点请求
     val PLACE_PICKER_REQUEST = 1
@@ -48,22 +42,12 @@ class GMapActivity : BaseMapActivity() {
             // 点击事件
             setOnMapClickListener {
                 position ->
-                // 设置当前点击位置
-                selectedPosition = position
-                // 移除上次标记后添加当前点击位置标记
-                selectedMarker?.remove()
-                selectedMarker = addMarker(MarkerOptions().position(position)
-                        .title("Selected:$position"))
+                setSelectedPoint("Selected", position)
             }
 
             setOnPoiClickListener {
                 poi ->
-                // 设置当前点击位置
-                selectedPosition = poi.latLng
-                // 移除上次标记后添加当前点击位置标记
-                selectedMarker?.remove()
-                selectedMarker = addMarker(MarkerOptions().position(poi.latLng)
-                        .title("${poi.name}:${poi.latLng}"))
+                setSelectedPoint(poi)
                 showToast(poi.name)
             }
         }
@@ -100,13 +84,8 @@ class GMapActivity : BaseMapActivity() {
             if (resultCode == RESULT_OK) {
                 // 选点成功
                 val place = PlacePicker.getPlace(this, data)
-                showToast("${place.name}")
-                // 设置当前点击位置
-                selectedPosition = place.latLng
-                // 移除上次标记后添加当前点击位置标记
-                selectedMarker?.remove()
-                selectedMarker = mGMap?.addMarker(MarkerOptions().position(place.latLng)
-                        .title("${place.name}:${place.latLng}"))
+                setSelectedPoint(place)
+                showToast(place.name.toString())
             }
         }
     }

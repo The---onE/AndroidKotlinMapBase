@@ -22,6 +22,7 @@ abstract class BaseMapActivity : BaseTempActivity() {
 
     // 当前选定位置
     var selectedPosition: LatLng? = null
+    var selectedTitle: String? = null
     var selectedMarker: Marker? = null
 
     /**
@@ -74,6 +75,7 @@ abstract class BaseMapActivity : BaseTempActivity() {
         mGMap?.apply {
             // 设置当前点击位置
             selectedPosition = position
+            selectedTitle = description
             // 移除上次标记后添加当前点击位置标记
             selectedMarker?.remove()
             val latitude = (Math.round(position.latitude * 100000)).toFloat() / 100000

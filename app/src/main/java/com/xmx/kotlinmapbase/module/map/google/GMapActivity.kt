@@ -9,6 +9,7 @@ import com.xmx.kotlinmapbase.R
 import com.xmx.kotlinmapbase.common.map.gmap.BaseMapActivity
 import kotlinx.android.synthetic.main.activity_gmap.*
 import android.content.Intent
+import android.view.View.VISIBLE
 
 class GMapActivity : BaseMapActivity() {
     // 谷歌地图布局Fragment
@@ -42,12 +43,14 @@ class GMapActivity : BaseMapActivity() {
             // 点击事件
             setOnMapClickListener {
                 position ->
-                setSelectedPoint("Selected", position)
+                setSelectedPoint("未知", position)
+                btnCollect.visibility = VISIBLE
             }
-
+            // 官方POI点击事件
             setOnPoiClickListener {
                 poi ->
                 setSelectedPoint(poi)
+                btnCollect.visibility = VISIBLE
                 showToast(poi.name)
             }
         }
@@ -74,6 +77,15 @@ class GMapActivity : BaseMapActivity() {
                     .build(this)
             startActivityForResult(intent, PLACE_PICKER_REQUEST)
         }
+
+        // 收藏
+        btnCollect.setOnClickListener {
+            selectedPosition?.apply {
+                // 显示收藏对话框
+                val dialog = CollectDialog(this@GMapActivity, this, selectedTitle)
+                dialog.show(fragmentManager, "collect")
+            }
+        }
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {
@@ -85,6 +97,7 @@ class GMapActivity : BaseMapActivity() {
                 // 选点成功
                 val place = PlacePicker.getPlace(this, data)
                 setSelectedPoint(place)
+                btnCollect.visibility = VISIBLE
                 showToast(place.name.toString())
             }
         }

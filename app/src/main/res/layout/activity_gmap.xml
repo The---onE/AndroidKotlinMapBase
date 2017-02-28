@@ -19,12 +19,21 @@
             android:layout_height="match_parent" />
 
         <Button
+            android:id="@+id/btnCollect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="收藏"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/btnPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:text="选点"/>
+            android:text="选点" />
 
     </RelativeLayout>
 

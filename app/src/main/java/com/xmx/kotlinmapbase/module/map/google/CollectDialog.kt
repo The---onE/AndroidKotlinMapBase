@@ -19,10 +19,13 @@ import kotlinx.android.synthetic.main.dialog_collect.*
 /**
  * Created by The_onE on 2017/2/28.
  * 收藏POI对话框
+ * @property[mContext] 当前上下文
  * @property[position] 收藏点的位置
  * @property[title] 标题框默认显示的标题
+ * @property[onSuccess] 收藏成功后的操作
  */
-class CollectDialog(val mContext: Context, val position: LatLng, var title: String? = null)
+class CollectDialog(val mContext: Context, val position: LatLng, var title: String? = null,
+                    val onSuccess: ((Collection) -> Unit))
     : DialogFragment() {
     var mType: String? = null
 
@@ -83,6 +86,7 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                     success = {
                         id ->
                         StringUtil.showToast(mContext, "收藏成功")
+                        onSuccess(col)
                         dismiss()
                     },
                     error = collectionManager.defaultError(mContext),

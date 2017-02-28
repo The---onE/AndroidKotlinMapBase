@@ -10,6 +10,7 @@ import com.xmx.kotlinmapbase.common.map.gmap.BaseMapActivity
 import kotlinx.android.synthetic.main.activity_gmap.*
 import android.content.Intent
 import android.view.View.VISIBLE
+import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
 
 class GMapActivity : BaseMapActivity() {
     // 谷歌地图布局Fragment
@@ -82,13 +83,42 @@ class GMapActivity : BaseMapActivity() {
         btnCollect.setOnClickListener {
             selectedPosition?.apply {
                 // 显示收藏对话框
-                val dialog = CollectDialog(this@GMapActivity, this, selectedTitle)
+                val dialog = CollectDialog(this@GMapActivity, this, selectedTitle, {
+                    // 将新收藏显示在地图上
+                    it.apply {
+                        if (collectionTypeManager.getTypeList().isNotEmpty()) {
+                            val iconId = collectionTypeManager.getIconId(mType)
+                            if (iconId != null) {
+                                addMarker(mPosition, mTitle, iconId, mContent)
+                            }
+                        }
+                    }
+                })
                 dialog.show(fragmentManager, "collect")
             }
         }
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {
+        // 查询所有收藏
+        collectionManager.selectAll(
+                success = {
+                    list ->
+                    list.forEach {
+                        // 将收藏显示在地图上
+                        it.apply {
+                            if (collectionTypeManager.getTypeList().isNotEmpty()) {
+                                val iconId = collectionTypeManager.getIconId(mType)
+                                if (iconId != null) {
+                                    addMarker(mPosition, mTitle, iconId, mContent)
+                                }
+                            }
+                        }
+                    }
+                },
+                error = collectionManager.defaultError(this),
+                cloudError = collectionManager.defaultCloudError(this)
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

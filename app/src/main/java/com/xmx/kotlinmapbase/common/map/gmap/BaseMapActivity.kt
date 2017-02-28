@@ -3,10 +3,7 @@ package com.xmx.kotlinmapbase.common.map.gmap
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.gms.maps.model.*
 import com.xmx.kotlinmapbase.base.activity.BaseTempActivity
 
 /**
@@ -100,5 +97,22 @@ abstract class BaseMapActivity : BaseTempActivity() {
      */
     fun setSelectedPoint(place: Place) {
         setSelectedPoint(place.name.toString(), place.latLng)
+    }
+
+    /**
+     * 添加标记
+     * @param[position] 位置
+     * @param[title] 标题
+     * @param[iconId] 图标drawable ID
+     * @param[content] 内容
+     * @return 生成的标记
+     */
+    fun addMarker(position: LatLng, title: String, iconId: Int, content: String?): Marker? {
+        return mGMap?.addMarker(MarkerOptions()
+                .position(position)
+                .title(title)
+                .snippet(content)
+                .icon(BitmapDescriptorFactory.fromResource(iconId))
+        )
     }
 }

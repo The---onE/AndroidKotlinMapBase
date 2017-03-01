@@ -1,5 +1,6 @@
 package com.xmx.kotlinmapbase.module.map.google
 
+import android.app.AlertDialog
 import android.os.Bundle
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.*
@@ -9,8 +10,11 @@ import com.xmx.kotlinmapbase.R
 import com.xmx.kotlinmapbase.common.map.gmap.BaseMapActivity
 import kotlinx.android.synthetic.main.activity_gmap.*
 import android.content.Intent
+import android.view.View.GONE
 import android.view.View.VISIBLE
+import com.google.android.gms.maps.model.Marker
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
+import java.util.*
 
 class GMapActivity : BaseMapActivity() {
     // 谷歌地图布局Fragment
@@ -20,6 +24,12 @@ class GMapActivity : BaseMapActivity() {
 
     // 选点请求
     val PLACE_PICKER_REQUEST = 1
+    // 收藏地图标记对应Cloud Id
+    val markerIdMap = HashMap<Marker, String>()
+    // 当前选中的收藏标记
+    var collectionMarker: Marker? = null
+    // 当前选中的收藏Cloud Id
+    var collectionCloudId: String? = null
 
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_gmap)
@@ -46,13 +56,37 @@ class GMapActivity : BaseMapActivity() {
                 position ->
                 setSelectedPoint("未知", position)
                 btnCollect.visibility = VISIBLE
+                btnDelete.visibility = GONE
+                collectionMarker = null
+                collectionCloudId = null
             }
             // 官方POI点击事件
             setOnPoiClickListener {
                 poi ->
                 setSelectedPoint(poi)
                 btnCollect.visibility = VISIBLE
+                btnDelete.visibility = GONE
+                collectionMarker = null
+                collectionCloudId = null
                 showToast(poi.name)
+            }
+            // 地图标记点击事件
+            setOnMarkerClickListener {
+                marker ->
+                setSelectedPoint(marker.title, marker.position)
+                collectionMarker = null
+                collectionCloudId = null
+                // 若点击的是收藏标记
+                val cloudId = markerIdMap[marker]
+                cloudId?.apply {
+                    // 显示删除按钮
+                    btnCollect.visibility = GONE
+                    btnDelete.visibility = VISIBLE
+                    collectionMarker = marker
+                    collectionCloudId = this
+                }
+                // 依然显示谷歌地图默认标记信息
+                false
             }
         }
     }
@@ -89,12 +123,43 @@ class GMapActivity : BaseMapActivity() {
                         if (collectionTypeManager.getTypeList().isNotEmpty()) {
                             val iconId = collectionTypeManager.getIconId(mType)
                             if (iconId != null) {
-                                addMarker(mPosition, mTitle, iconId, mContent)
+                                val marker = addMarker(mPosition, mTitle, iconId, mContent)
+                                // 添加收藏对应的Cloud Id
+                                marker?.apply { markerIdMap.put(this, cloudId) }
                             }
                         }
                     }
                 })
                 dialog.show(fragmentManager, "collect")
+            }
+        }
+        // 删除收藏
+        btnDelete.setOnClickListener {
+            collectionCloudId?.apply {
+                AlertDialog.Builder(this@GMapActivity)
+                        .setTitle("删除")
+                        .setMessage("确定要删除收藏吗")
+                        .setPositiveButton(R.string.confirm, {
+                            dialog, i ->
+                            // 删除收藏
+                            collectionManager.deleteFromCloud(this,
+                                    success = {
+                                        // 删除成功
+                                        showToast(R.string.delete_success)
+                                        // 移除标记
+                                        collectionMarker?.remove()
+                                        btnDelete.visibility = GONE
+                                        dialog.dismiss()
+                                    },
+                                    error = collectionManager.defaultError(this@GMapActivity),
+                                    cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                            )
+                        })
+                        .setNegativeButton(R.string.cancel, {
+                            dialog, i ->
+                            dialog.dismiss()
+                        })
+                        .show()
             }
         }
     }
@@ -110,7 +175,9 @@ class GMapActivity : BaseMapActivity() {
                             if (collectionTypeManager.getTypeList().isNotEmpty()) {
                                 val iconId = collectionTypeManager.getIconId(mType)
                                 if (iconId != null) {
-                                    addMarker(mPosition, mTitle, iconId, mContent)
+                                    val marker = addMarker(mPosition, mTitle, iconId, mContent)
+                                    // 添加收藏对应的Cloud Id
+                                    marker?.apply { markerIdMap.put(this, cloudId) }
                                 }
                             }
                         }

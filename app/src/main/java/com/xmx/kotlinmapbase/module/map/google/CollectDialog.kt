@@ -84,8 +84,9 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
             // 添加收藏
             collectionManager.insertToCloud(col,
                     success = {
-                        id ->
+                        user, id ->
                         StringUtil.showToast(mContext, "收藏成功")
+                        col.cloudId = id
                         onSuccess(col)
                         dismiss()
                     },

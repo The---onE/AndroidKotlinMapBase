@@ -60,6 +60,11 @@ class GMapActivity : BaseMapActivity() {
                 collectionMarker = null
                 collectionCloudId = null
             }
+            // 长按事件
+            setOnMapLongClickListener {
+                position ->
+                setDeputyPoint("未知", position, R.drawable.point1)
+            }
             // 官方POI点击事件
             setOnPoiClickListener {
                 poi ->
@@ -73,12 +78,12 @@ class GMapActivity : BaseMapActivity() {
             // 地图标记点击事件
             setOnMarkerClickListener {
                 marker ->
-                setSelectedPoint(marker.title, marker.position)
                 collectionMarker = null
                 collectionCloudId = null
                 // 若点击的是收藏标记
                 val cloudId = markerIdMap[marker]
                 cloudId?.apply {
+                    setSelectedPoint(marker.title, marker.position)
                     // 显示删除按钮
                     btnCollect.visibility = GONE
                     btnDelete.visibility = VISIBLE

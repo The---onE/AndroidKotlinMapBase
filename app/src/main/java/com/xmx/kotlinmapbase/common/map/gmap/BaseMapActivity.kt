@@ -5,6 +5,11 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
 import com.google.android.gms.maps.model.*
 import com.xmx.kotlinmapbase.base.activity.BaseTempActivity
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
+
+
 
 /**
  * Created by The_onE on 2017/2/26.
@@ -21,6 +26,11 @@ abstract class BaseMapActivity : BaseTempActivity() {
     var selectedPosition: LatLng? = null
     var selectedTitle: String? = null
     var selectedMarker: Marker? = null
+
+    // 副选定位置
+    var deputyPosition: LatLng? = null
+    var deputyMarker: Marker? = null
+    var linkPolyline: Polyline? = null
 
     /**
      * 从地图Fragment控件获取地图对象
@@ -80,6 +90,10 @@ abstract class BaseMapActivity : BaseTempActivity() {
             val des = description.replace('\n', ' ')
             selectedMarker = addMarker(MarkerOptions().position(position)
                     .title("$des($latitude,$longitude)"))
+            // 添加主位置和副位置的连接线
+            deputyPosition?.apply {
+                addLinkPolyLine()
+            }
         }
     }
 
@@ -100,6 +114,29 @@ abstract class BaseMapActivity : BaseTempActivity() {
     }
 
     /**
+     * 设置副位置
+     * @param[description] 描述
+     * @param[position] 位置
+     * @param[iconId] 标记图标
+     */
+    fun setDeputyPoint(description: String, position: LatLng, iconId: Int) {
+        mGMap?.apply {
+            // 设置位置
+            deputyPosition = position
+            // 移除上次标记后添加新位置标记
+            deputyMarker?.remove()
+            deputyMarker = addMarker(MarkerOptions().position(position)
+                    .title(description)
+                    .icon(BitmapDescriptorFactory.fromResource(iconId))
+                    .anchor(0.5f, 0.5f))
+            // 添加主位置和副位置的连接线
+            selectedPosition?.apply {
+                addLinkPolyLine()
+            }
+        }
+    }
+
+    /**
      * 添加标记
      * @param[position] 位置
      * @param[title] 标题
@@ -114,5 +151,21 @@ abstract class BaseMapActivity : BaseTempActivity() {
                 .snippet(content)
                 .icon(BitmapDescriptorFactory.fromResource(iconId))
         )
+    }
+
+    /**
+     * 添加主位置与副位置的连接线
+     */
+    fun addLinkPolyLine() {
+        linkPolyline?.remove()
+        selectedPosition?.let {
+            deputyPosition?.let {
+                val rectOptions = PolylineOptions()
+                        .add(selectedPosition)
+                        .add(deputyPosition)
+                        .geodesic(true) // 绘制为测地线，非直线
+                linkPolyline = mGMap?.addPolyline(rectOptions)
+            }
+        }
     }
 }

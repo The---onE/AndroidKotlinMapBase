@@ -3,7 +3,6 @@ package com.xmx.kotlinmapbase.module.map.google
 import android.app.AlertDialog
 import android.app.DialogFragment
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,6 @@ import com.xmx.kotlinmapbase.common.map.gmap.collection.Collection
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
 import com.xmx.kotlinmapbase.utils.StringUtil
 import kotlinx.android.synthetic.main.dialog_collect.*
-
 
 /**
  * Created by The_onE on 2017/2/28.

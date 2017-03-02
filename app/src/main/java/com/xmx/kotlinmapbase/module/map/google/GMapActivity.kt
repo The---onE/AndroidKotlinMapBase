@@ -14,6 +14,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import com.google.android.gms.maps.model.Marker
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
+import com.xmx.kotlinmapbase.common.map.gmap.route.routeManager
 import java.util.*
 
 class GMapActivity : BaseMapActivity() {
@@ -64,6 +65,7 @@ class GMapActivity : BaseMapActivity() {
             setOnMapLongClickListener {
                 position ->
                 setDeputyPoint("未知", position, R.drawable.point1)
+                btnAddRoute.visibility = VISIBLE
             }
             // 官方POI点击事件
             setOnPoiClickListener {
@@ -167,6 +169,19 @@ class GMapActivity : BaseMapActivity() {
                         .show()
             }
         }
+        // 添加路线
+        btnAddRoute.setOnClickListener {
+            selectedPosition?.let {
+                deputyPosition?.let {
+                    val dialog = RouteDialog(this, selectedPosition!!, deputyPosition!!, {
+                        it.apply {
+                            addRoute(mStart, mEnd, mColor, mWidth)
+                        }
+                    })
+                    dialog.show(fragmentManager, "route")
+                }
+            }
+        }
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {
@@ -190,6 +205,20 @@ class GMapActivity : BaseMapActivity() {
                 },
                 error = collectionManager.defaultError(this),
                 cloudError = collectionManager.defaultCloudError(this)
+        )
+        // 查询所有路线
+        routeManager.selectAll(
+                success = {
+                    list ->
+                    list.forEach {
+                        // 将路线显示在地图上
+                        it.apply {
+                            addRoute(mStart, mEnd, mColor, mWidth)
+                        }
+                    }
+                },
+                error = routeManager.defaultError(this),
+                cloudError = routeManager.defaultCloudError(this)
         )
     }
 

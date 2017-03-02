@@ -39,6 +39,13 @@
                 android:text="删除"
                 android:visibility="gone" />
 
+            <Button
+                android:id="@+id/btnAddRoute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="添加路线"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <Button

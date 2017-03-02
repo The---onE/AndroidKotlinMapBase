@@ -1,5 +1,6 @@
 package com.xmx.kotlinmapbase.common.map.gmap
 
+import android.graphics.Color
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
@@ -8,7 +9,6 @@ import com.xmx.kotlinmapbase.base.activity.BaseTempActivity
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
-
 
 
 /**
@@ -164,8 +164,28 @@ abstract class BaseMapActivity : BaseTempActivity() {
                         .add(selectedPosition)
                         .add(deputyPosition)
                         .geodesic(true) // 绘制为测地线，非直线
+                // 默认为黑色，宽度为10.0
                 linkPolyline = mGMap?.addPolyline(rectOptions)
             }
         }
+    }
+
+    /**
+     * 添加一条从起点到终点的测地线
+     * @param[start] 起点
+     * @param[end] 终点
+     * @param[color] 颜色
+     * @param[width] 宽度
+     */
+    fun addRoute(start: LatLng, end: LatLng,
+                 color: Int,
+                 width: Float): Polyline? {
+        val rectOptions = PolylineOptions()
+                .add(start)
+                .add(end)
+                .color(color)
+                .width(width)
+                .geodesic(true) // 绘制为测地线，非直线
+        return mGMap?.addPolyline(rectOptions)
     }
 }

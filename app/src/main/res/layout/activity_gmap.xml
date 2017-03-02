@@ -46,6 +46,13 @@
                 android:text="添加路线"
                 android:visibility="gone" />
 
+            <Button
+                android:id="@+id/btnDelRoute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除路线"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <Button

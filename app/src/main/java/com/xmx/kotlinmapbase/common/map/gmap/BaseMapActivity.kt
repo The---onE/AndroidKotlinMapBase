@@ -186,6 +186,7 @@ abstract class BaseMapActivity : BaseTempActivity() {
                 .color(color)
                 .width(width)
                 .geodesic(true) // 绘制为测地线，非直线
+                .clickable(true) // 可以被点击
         return mGMap?.addPolyline(rectOptions)
     }
 }

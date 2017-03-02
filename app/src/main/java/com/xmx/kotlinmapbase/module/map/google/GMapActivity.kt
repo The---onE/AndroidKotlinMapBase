@@ -13,9 +13,12 @@ import android.content.Intent
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.Polyline
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
+import com.xmx.kotlinmapbase.common.map.gmap.route.Route
 import com.xmx.kotlinmapbase.common.map.gmap.route.routeManager
 import java.util.*
+import kotlin.collections.HashMap
 
 class GMapActivity : BaseMapActivity() {
     // 谷歌地图布局Fragment
@@ -31,6 +34,11 @@ class GMapActivity : BaseMapActivity() {
     var collectionMarker: Marker? = null
     // 当前选中的收藏Cloud Id
     var collectionCloudId: String? = null
+
+    // 地图绘制线对应路线
+    val polylineRouteMap = HashMap<Polyline, Route>()
+    // 当前选中地图线
+    var selectedPolyline: Polyline? = null
 
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_gmap)
@@ -58,6 +66,7 @@ class GMapActivity : BaseMapActivity() {
                 setSelectedPoint("未知", position)
                 btnCollect.visibility = VISIBLE
                 btnDelete.visibility = GONE
+                btnDelRoute.visibility = GONE
                 collectionMarker = null
                 collectionCloudId = null
             }
@@ -66,6 +75,7 @@ class GMapActivity : BaseMapActivity() {
                 position ->
                 setDeputyPoint("未知", position, R.drawable.point1)
                 btnAddRoute.visibility = VISIBLE
+                btnDelRoute.visibility = GONE
             }
             // 官方POI点击事件
             setOnPoiClickListener {
@@ -73,6 +83,7 @@ class GMapActivity : BaseMapActivity() {
                 setSelectedPoint(poi)
                 btnCollect.visibility = VISIBLE
                 btnDelete.visibility = GONE
+                btnDelRoute.visibility = GONE
                 collectionMarker = null
                 collectionCloudId = null
                 showToast(poi.name)
@@ -89,11 +100,24 @@ class GMapActivity : BaseMapActivity() {
                     // 显示删除按钮
                     btnCollect.visibility = GONE
                     btnDelete.visibility = VISIBLE
+                    btnDelRoute.visibility = GONE
                     collectionMarker = marker
                     collectionCloudId = this
                 }
                 // 依然显示谷歌地图默认标记信息
                 false
+            }
+            // 路线点击事件
+            setOnPolylineClickListener {
+                polyline ->
+                val route = polylineRouteMap[polyline]
+                route?.apply {
+                    // 显示路线信息
+                    showToast(mTitle)
+                    // 可以删除路线
+                    selectedPolyline = polyline
+                    btnDelRoute.visibility = VISIBLE
+                }
             }
         }
     }
@@ -175,10 +199,44 @@ class GMapActivity : BaseMapActivity() {
                 deputyPosition?.let {
                     val dialog = RouteDialog(this, selectedPosition!!, deputyPosition!!, {
                         it.apply {
-                            addRoute(mStart, mEnd, mColor, mWidth)
+                            val polyline = addRoute(mStart, mEnd, mColor, mWidth)
+                            // 添加绘制线对应的路线
+                            polyline?.apply { polylineRouteMap.put(polyline, it) }
                         }
                     })
                     dialog.show(fragmentManager, "route")
+                }
+            }
+        }
+        // 删除路线
+        btnDelRoute.setOnClickListener {
+            selectedPolyline?.apply {
+                val route = polylineRouteMap[selectedPolyline!!]
+                route?.apply {
+                    AlertDialog.Builder(this@GMapActivity)
+                            .setTitle("删除")
+                            .setMessage("确定要删除路线吗")
+                            .setPositiveButton(R.string.confirm, {
+                                dialog, i ->
+                                // 删除收藏
+                                routeManager.deleteFromCloud(cloudId,
+                                        success = {
+                                            // 删除成功
+                                            showToast(R.string.delete_success)
+                                            // 移除标记
+                                            remove()
+                                            btnDelRoute.visibility = GONE
+                                            dialog.dismiss()
+                                        },
+                                        error = collectionManager.defaultError(this@GMapActivity),
+                                        cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                                )
+                            })
+                            .setNegativeButton(R.string.cancel, {
+                                dialog, i ->
+                                dialog.dismiss()
+                            })
+                            .show()
                 }
             }
         }
@@ -213,7 +271,9 @@ class GMapActivity : BaseMapActivity() {
                     list.forEach {
                         // 将路线显示在地图上
                         it.apply {
-                            addRoute(mStart, mEnd, mColor, mWidth)
+                            val polyline = addRoute(mStart, mEnd, mColor, mWidth)
+                            // 添加绘制线对应的路线
+                            polyline?.apply { polylineRouteMap.put(polyline, it) }
                         }
                     }
                 },

@@ -148,21 +148,8 @@ class GMapActivity : BaseMapActivity() {
         // 收藏
         btnCollect.setOnClickListener {
             selectedPosition?.apply {
-                // 显示收藏对话框
-                val dialog = CollectDialog(this@GMapActivity, this, selectedTitle, {
-                    // 将新收藏显示在地图上
-                    it.apply {
-                        if (collectionTypeManager.getTypeList().isNotEmpty()) {
-                            val iconId = collectionTypeManager.getIconId(mType)
-                            if (iconId != null) {
-                                val marker = addMarker(mPosition, mTitle, iconId, mContent)
-                                // 添加收藏对应的Cloud Id
-                                marker?.apply { markerCollectionMap.put(marker, it) }
-                            }
-                        }
-                    }
-                })
-                dialog.show(fragmentManager, "collect")
+                // 弹出添加对话框
+                addCollection()
             }
         }
         // 编辑收藏
@@ -171,56 +158,15 @@ class GMapActivity : BaseMapActivity() {
                 AlertDialog.Builder(this@GMapActivity)
                         .setTitle("编辑")
                         .setMessage("要编辑该收藏吗？")
-                        .setPositiveButton("修改", {
+                        .setPositiveButton(R.string.modify, {
                             dialog, i ->
                             // 弹出修改对话框
-                            val editDialog = CollectDialog(this@GMapActivity, this, {
-                                // 将新收藏显示在地图上
-                                it.apply {
-                                    if (collectionTypeManager.getTypeList().isNotEmpty()) {
-                                        val iconId = collectionTypeManager.getIconId(mType)
-                                        if (iconId != null) {
-                                            // 移除之前的标记
-                                            collectionMarker?.remove()
-                                            // 添加修改后的标记
-                                            val marker = addMarker(mPosition, mTitle, iconId, mContent)
-                                            // 添加新的标记与Cloud Id对应
-                                            marker?.apply { markerCollectionMap.put(marker, it) }
-                                        }
-                                    }
-                                }
-                            })
-                            editDialog.show(fragmentManager, "editCollection")
+                            modifyCollection(this)
                         })
                         .setNegativeButton(R.string.delete, {
                             dialog, i ->
                             // 弹出删除对话框
-                            AlertDialog.Builder(this@GMapActivity)
-                                    .setTitle("删除")
-                                    .setMessage("确定要删除该收藏吗？")
-                                    .setPositiveButton(R.string.confirm, {
-                                        deleteDialog, i ->
-                                        // 删除收藏
-                                        collectionManager.deleteFromCloud(cloudId,
-                                                success = {
-                                                    // 删除成功
-                                                    showToast(R.string.delete_success)
-                                                    // 移除标记
-                                                    collectionMarker?.remove()
-                                                    btnEditCollection.visibility = GONE
-                                                    // 关闭对话框
-                                                    deleteDialog.dismiss()
-                                                },
-                                                error = collectionManager.defaultError(this@GMapActivity),
-                                                cloudError = collectionManager.defaultCloudError(this@GMapActivity)
-                                        )
-                                    })
-                                    .setNeutralButton(R.string.cancel, {
-                                        deleteDialog, i ->
-                                        // 取消删除
-                                        deleteDialog.dismiss()
-                                    })
-                                    .show()
+                            deleteCollection(this)
                         })
                         .setNeutralButton(R.string.cancel, {
                             dialog, i ->
@@ -234,14 +180,8 @@ class GMapActivity : BaseMapActivity() {
         btnAddRoute.setOnClickListener {
             selectedPosition?.let {
                 deputyPosition?.let {
-                    val dialog = RouteDialog(this, selectedPosition!!, deputyPosition!!, {
-                        it.apply {
-                            val polyline = addRoute(mStart, mEnd, mColor, mWidth)
-                            // 添加绘制线对应的路线
-                            polyline?.apply { polylineRouteMap.put(polyline, it) }
-                        }
-                    })
-                    dialog.show(fragmentManager, "route")
+                    // 弹出添加对话框
+                    addRoute()
                 }
             }
         }
@@ -250,33 +190,133 @@ class GMapActivity : BaseMapActivity() {
             selectedPolyline?.apply {
                 val route = polylineRouteMap[selectedPolyline!!]
                 route?.apply {
-                    AlertDialog.Builder(this@GMapActivity)
-                            .setTitle("删除")
-                            .setMessage("确定要删除路线吗")
-                            .setPositiveButton(R.string.confirm, {
-                                dialog, i ->
-                                // 删除收藏
-                                routeManager.deleteFromCloud(cloudId,
-                                        success = {
-                                            // 删除成功
-                                            showToast(R.string.delete_success)
-                                            // 移除标记
-                                            remove()
-                                            btnDelRoute.visibility = GONE
-                                            dialog.dismiss()
-                                        },
-                                        error = collectionManager.defaultError(this@GMapActivity),
-                                        cloudError = collectionManager.defaultCloudError(this@GMapActivity)
-                                )
-                            })
-                            .setNegativeButton(R.string.cancel, {
-                                dialog, i ->
-                                dialog.dismiss()
-                            })
-                            .show()
+                    // 弹出删除对话框
+                    deleteRoute(this)
                 }
             }
         }
+    }
+
+    /**
+     * 弹出添加对话框添加收藏
+     */
+    private fun addCollection() {
+        // 显示收藏对话框
+        val dialog = CollectDialog(this@GMapActivity, selectedPosition!!, selectedTitle, {
+            // 将新收藏显示在地图上
+            it.apply {
+                if (collectionTypeManager.getTypeList().isNotEmpty()) {
+                    val iconId = collectionTypeManager.getIconId(mType)
+                    if (iconId != null) {
+                        val marker = addMarker(mPosition, mTitle, iconId, mContent)
+                        // 添加收藏对应的Cloud Id
+                        marker?.apply { markerCollectionMap.put(marker, it) }
+                    }
+                }
+            }
+        })
+        dialog.show(fragmentManager, "collect")
+    }
+
+    /**
+     * 弹出修改对话框修改收藏
+     * @param[collection] 要修改的收藏
+     */
+    private fun modifyCollection(collection: Collection) {
+        val editDialog = CollectDialog(this@GMapActivity, collection, {
+            // 将新收藏显示在地图上
+            it.apply {
+                if (collectionTypeManager.getTypeList().isNotEmpty()) {
+                    val iconId = collectionTypeManager.getIconId(mType)
+                    if (iconId != null) {
+                        // 移除之前的标记
+                        collectionMarker?.remove()
+                        // 添加修改后的标记
+                        val marker = addMarker(mPosition, mTitle, iconId, mContent)
+                        // 添加新的标记与Cloud Id对应
+                        marker?.apply { markerCollectionMap.put(marker, it) }
+                    }
+                }
+            }
+        })
+        editDialog.show(fragmentManager, "editCollection")
+    }
+
+    /**
+     * 弹出删除提示框删除收藏
+     * @param[collection] 要删除的收藏
+     */
+    private fun deleteCollection(collection: Collection) {
+        AlertDialog.Builder(this@GMapActivity)
+                .setTitle("删除")
+                .setMessage("确定要删除该收藏吗？")
+                .setPositiveButton(R.string.confirm, {
+                    deleteDialog, i ->
+                    // 删除收藏
+                    collectionManager.deleteFromCloud(collection.cloudId,
+                            success = {
+                                // 删除成功
+                                showToast(R.string.delete_success)
+                                // 移除标记
+                                collectionMarker?.remove()
+                                btnEditCollection.visibility = GONE
+                                deleteDialog.dismiss()
+                            },
+                            error = collectionManager.defaultError(this@GMapActivity),
+                            cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                    )
+                })
+                .setNeutralButton(R.string.cancel, {
+                    deleteDialog, i ->
+                    // 取消删除
+                    deleteDialog.dismiss()
+                })
+                .show()
+    }
+
+    /**
+     * 弹出添加对话框添加路线
+     */
+    private fun addRoute() {
+        val dialog = RouteDialog(this, selectedPosition!!, deputyPosition!!, {
+            it.apply {
+                val polyline = addRoute(mStart, mEnd, mColor, mWidth)
+                // 添加绘制线对应的路线
+                polyline?.apply { polylineRouteMap.put(polyline, it) }
+            }
+        })
+        dialog.show(fragmentManager, "route")
+    }
+
+    /**
+     * 弹出删除提示框删除路线
+     * @param[route] 要删除的路线
+     */
+    private fun deleteRoute(route: Route) {
+        AlertDialog.Builder(this@GMapActivity)
+                .setTitle("删除")
+                .setMessage("确定要删除路线吗")
+                .setPositiveButton(R.string.confirm, {
+                    dialog, i ->
+                    // 删除收藏
+                    routeManager.deleteFromCloud(route.cloudId,
+                            success = {
+                                // 删除成功
+                                showToast(R.string.delete_success)
+                                // 移除绘制线
+                                selectedPolyline?.remove()
+                                btnDelRoute.visibility = GONE
+                                dialog.dismiss()
+                            },
+                            error = collectionManager.defaultError(this@GMapActivity),
+                            cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                    )
+                })
+                .setNegativeButton(R.string.cancel, {
+                    dialog, i ->
+                    dialog.dismiss()
+                })
+                .show()
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {

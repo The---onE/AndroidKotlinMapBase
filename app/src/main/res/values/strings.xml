@@ -28,6 +28,7 @@
     <string name="sync_failure">同步失败</string>
 
     <string name="edit">编辑</string>
+    <string name="modify">修改</string>
     <string name="save">保存</string>
     <string name="save_success">保存成功</string>
     <string name="save_failure">保存失败</string>

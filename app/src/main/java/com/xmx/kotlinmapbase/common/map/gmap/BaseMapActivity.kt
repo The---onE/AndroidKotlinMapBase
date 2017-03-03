@@ -145,9 +145,11 @@ abstract class BaseMapActivity : BaseTempActivity() {
      * @return 生成的标记
      */
     fun addMarker(position: LatLng, title: String, iconId: Int, content: String?): Marker? {
+        // 谷歌默认信息窗口标题无法换行
+        val t = title.replace('\n', ' ')
         return mGMap?.addMarker(MarkerOptions()
                 .position(position)
-                .title(title)
+                .title(t)
                 .snippet(content)
                 .icon(BitmapDescriptorFactory.fromResource(iconId))
         )

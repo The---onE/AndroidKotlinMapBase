@@ -33,10 +33,10 @@
                 android:visibility="gone" />
 
             <Button
-                android:id="@+id/btnDelete"
+                android:id="@+id/btnEditCollection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="删除"
+                android:text="编辑收藏"
                 android:visibility="gone" />
 
             <Button

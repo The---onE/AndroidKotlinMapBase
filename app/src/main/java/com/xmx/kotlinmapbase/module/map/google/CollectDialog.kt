@@ -25,7 +25,24 @@ import kotlinx.android.synthetic.main.dialog_collect.*
 class CollectDialog(val mContext: Context, val position: LatLng, var title: String? = null,
                     val onSuccess: ((Collection) -> Unit))
     : DialogFragment() {
-    var mType: String? = null
+    var type: String? = null
+    // 是否为修改对话框
+    var mModifyFlag = false
+    // 要修改的收藏
+    var mCollection: Collection? = null
+
+    /**
+     * 修改收藏对话框
+     * @param[context] 当前上下文
+     * @param[collection] 要修改的收藏
+     * @param[onSuccess] 修改成功的操作
+     */
+    constructor(context: Context, collection: Collection, onSuccess: ((Collection) -> Unit))
+            : this(context, collection.mPosition, collection.mTitle, onSuccess) {
+        mModifyFlag = true
+        mCollection = collection
+        type = collection.mType
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.dialog_collect, container)
@@ -37,13 +54,16 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
         dialog.requestWindowFeature(STYLE_NO_TITLE)
         // 填充标题框
         title?.apply { editTitle.setText(this) }
-
+        // 填充描述框
+        mCollection?.apply { editContent.setText(mContent) }
         // 设置类型相关事件
         if (collectionTypeManager.getTypeList().isNotEmpty()) {
             val list = collectionTypeManager.getTypeList()
-            // 默认显示第一种类型
-            mType = collectionTypeManager.getTypeList()[0]
-            imgType.setImageResource(collectionTypeManager.getIconId(mType!!)!!)
+            if (type.isNullOrEmpty()) {
+                // 默认显示第一种类型
+                type = collectionTypeManager.getTypeList()[0]
+            }
+            imgType.setImageResource(collectionTypeManager.getIconId(type!!)!!)
             // 点击类型图标
             imgType.setOnClickListener {
                 // 弹出选择类型对话框
@@ -52,9 +72,9 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                         .setItems(list.toTypedArray(), {
                             dialogInterface, i ->
                             // 获取选择的类型
-                            mType = list[i]
+                            type = list[i]
                             // 更改选择的图标
-                            val iconId = collectionTypeManager.getIconId(mType!!)
+                            val iconId = collectionTypeManager.getIconId(type!!)
                             imgType.setImageResource(iconId!!)
                         })
                         .setNegativeButton("取消", {
@@ -67,30 +87,50 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
 
         // 确认
         btnConfirm.setOnClickListener {
-            if (mType == null) {
+            if (type == null) {
                 // 若未设置类型
                 if (collectionTypeManager.getTypeList().isNotEmpty()) {
                     // 设置为默认类型
-                    mType = collectionTypeManager.getTypeList()[0]
+                    type = collectionTypeManager.getTypeList()[0]
                 } else {
                     return@setOnClickListener
                 }
             }
-            // 生成收藏
-            val col = Collection(position, editTitle.text.toString(),
-                    mType!!, editContent.text.toString())
-            // 添加收藏
-            collectionManager.insertToCloud(col,
-                    success = {
-                        user, id ->
-                        StringUtil.showToast(mContext, "收藏成功")
-                        col.cloudId = id
-                        onSuccess(col)
-                        dismiss()
-                    },
-                    error = collectionManager.defaultError(mContext),
-                    cloudError = collectionManager.defaultCloudError(mContext)
-            )
+            if (!mModifyFlag) {
+                // 添加新收藏
+                // 生成收藏
+                val col = Collection(position, editTitle.text.toString(),
+                        type!!, editContent.text.toString())
+                // 添加收藏
+                collectionManager.insertToCloud(col,
+                        success = {
+                            user, id ->
+                            StringUtil.showToast(mContext, "收藏成功")
+                            col.cloudId = id
+                            onSuccess(col)
+                            dismiss()
+                        },
+                        error = collectionManager.defaultError(mContext),
+                        cloudError = collectionManager.defaultCloudError(mContext)
+                )
+            } else {
+                // 修改收藏
+                mCollection?.apply {
+                    mTitle = editTitle.text.toString()
+                    this.mType = type!!
+                    mContent = editContent.text.toString()
+                    // 插入带有Cloud Id的实体会覆盖之前的实体
+                    collectionManager.insertToCloud(this,
+                            success = {
+                                user, id ->
+                                StringUtil.showToast(mContext, "修改成功")
+                                onSuccess(this)
+                                dismiss()
+                            },
+                            error = collectionManager.defaultError(mContext),
+                            cloudError = collectionManager.defaultCloudError(mContext))
+                }
+            }
         }
         // 取消
         btnCancel.setOnClickListener {

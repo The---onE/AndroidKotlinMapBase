@@ -12,7 +12,6 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:hint="标题"
-        android:maxLength="16"
         android:textSize="32sp" />
 
     <TextView

@@ -1,7 +1,6 @@
 package com.xmx.kotlinmapbase.module.map.google
 
 import android.app.AlertDialog
-import android.content.DialogInterface.*
 import android.os.Bundle
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.*
@@ -54,7 +53,7 @@ class GMapActivity : BaseMapActivity() {
 
             // 地图中心
             val center = LatLng(35.7, 139.7)
-            moveCamera(CameraUpdateFactory.newLatLngZoom(center, 6f))
+            focusPosition(center)
             selectedPosition = center
         }
     }
@@ -65,6 +64,7 @@ class GMapActivity : BaseMapActivity() {
             setOnMapClickListener {
                 position ->
                 setSelectedPoint("未知", position)
+//                focusPosition(position, -1f)
                 btnCollect.visibility = VISIBLE
                 btnEditCollection.visibility = GONE
                 btnDelRoute.visibility = GONE
@@ -82,6 +82,7 @@ class GMapActivity : BaseMapActivity() {
             setOnPoiClickListener {
                 poi ->
                 setSelectedPoint(poi)
+                focusPosition(poi.latLng, -1f)
                 btnCollect.visibility = VISIBLE
                 btnEditCollection.visibility = GONE
                 btnDelRoute.visibility = GONE
@@ -95,15 +96,16 @@ class GMapActivity : BaseMapActivity() {
                 collectionMarker = null
                 collection = null
                 // 若点击的是收藏标记
-                val cloudId = markerCollectionMap[marker]
-                cloudId?.apply {
+                val collection = markerCollectionMap[marker]
+                collection?.apply {
                     setSelectedPoint(marker.title, marker.position)
+                    focusPosition(marker.position, -1f)
                     // 显示删除按钮
                     btnCollect.visibility = GONE
                     btnEditCollection.visibility = VISIBLE
                     btnDelRoute.visibility = GONE
                     collectionMarker = marker
-                    collection = this
+                    this@GMapActivity.collection = this
                 }
                 // 依然显示谷歌地图默认标记信息
                 false
@@ -159,17 +161,17 @@ class GMapActivity : BaseMapActivity() {
                         .setTitle("编辑")
                         .setMessage("要编辑该收藏吗？")
                         .setPositiveButton(R.string.modify, {
-                            dialog, i ->
+                            _, _ ->
                             // 弹出修改对话框
                             modifyCollection(this)
                         })
                         .setNegativeButton(R.string.delete, {
-                            dialog, i ->
+                            _, _ ->
                             // 弹出删除对话框
                             deleteCollection(this)
                         })
                         .setNeutralButton(R.string.cancel, {
-                            dialog, i ->
+                            dialog, _ ->
                             // 取消编辑
                             dialog.dismiss()
                         })
@@ -251,7 +253,7 @@ class GMapActivity : BaseMapActivity() {
                 .setTitle("删除")
                 .setMessage("确定要删除该收藏吗？")
                 .setPositiveButton(R.string.confirm, {
-                    deleteDialog, i ->
+                    deleteDialog, _ ->
                     // 删除收藏
                     collectionManager.deleteFromCloud(collection.cloudId,
                             success = {
@@ -267,7 +269,7 @@ class GMapActivity : BaseMapActivity() {
                     )
                 })
                 .setNeutralButton(R.string.cancel, {
-                    deleteDialog, i ->
+                    deleteDialog, _ ->
                     // 取消删除
                     deleteDialog.dismiss()
                 })
@@ -297,7 +299,7 @@ class GMapActivity : BaseMapActivity() {
                 .setTitle("删除")
                 .setMessage("确定要删除路线吗")
                 .setPositiveButton(R.string.confirm, {
-                    dialog, i ->
+                    dialog, _ ->
                     // 删除收藏
                     routeManager.deleteFromCloud(route.cloudId,
                             success = {
@@ -313,7 +315,7 @@ class GMapActivity : BaseMapActivity() {
                     )
                 })
                 .setNegativeButton(R.string.cancel, {
-                    dialog, i ->
+                    dialog, _ ->
                     dialog.dismiss()
                 })
                 .show()
@@ -365,6 +367,7 @@ class GMapActivity : BaseMapActivity() {
                 // 选点成功
                 val place = PlacePicker.getPlace(this, data)
                 setSelectedPoint(place)
+                focusPosition(place.latLng, 15f)
                 btnCollect.visibility = VISIBLE
                 showToast(place.name.toString())
             }

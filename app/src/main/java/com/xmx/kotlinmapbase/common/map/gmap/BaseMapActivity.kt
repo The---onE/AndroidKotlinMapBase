@@ -1,7 +1,7 @@
 package com.xmx.kotlinmapbase.common.map.gmap
 
-import android.graphics.Color
 import com.google.android.gms.location.places.Place
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.UiSettings
 import com.google.android.gms.maps.model.*
@@ -21,6 +21,9 @@ abstract class BaseMapActivity : BaseTempActivity() {
     var mGMap: GoogleMap? = null
     // 地图UI设置
     var mMapUi: UiSettings? = null
+
+    // 默认地图缩放
+    val DEFAULT_SCALE = 6f
 
     // 当前选定位置
     var selectedPosition: LatLng? = null
@@ -72,6 +75,28 @@ abstract class BaseMapActivity : BaseTempActivity() {
      * @param[ui] 地图UI属性
      */
     abstract fun setMapUi(ui: UiSettings?)
+
+    /**
+     * 聚焦特定位置，设置为默认远景缩放
+     * 若要不改变原缩放，请调用 focusPosition(center, -1f)
+     * @param[center] 聚焦中心
+     */
+    fun focusPosition(center: LatLng) {
+        mGMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_SCALE))
+    }
+
+    /**
+     * 聚焦特定位置，平滑移动到中心
+     * @param[center] 聚焦中心
+     * @param[scale] 缩放比例，大于0设置为新缩放，小于0不改变原缩放
+     */
+    fun focusPosition(center: LatLng, scale: Float) {
+        if (scale > 0) {
+            mGMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(center, scale))
+        } else {
+            mGMap?.animateCamera(CameraUpdateFactory.newLatLng(center))
+        }
+    }
 
     /**
      * 设置选中的点，移除之前选中点的标记，添加新标记
@@ -147,10 +172,11 @@ abstract class BaseMapActivity : BaseTempActivity() {
     fun addMarker(position: LatLng, title: String, iconId: Int, content: String?): Marker? {
         // 谷歌默认信息窗口标题无法换行
         val t = title.replace('\n', ' ')
+        val c = content?.replace('\n', ' ')
         return mGMap?.addMarker(MarkerOptions()
                 .position(position)
                 .title(t)
-                .snippet(content)
+                .snippet(c)
                 .icon(BitmapDescriptorFactory.fromResource(iconId))
         )
     }

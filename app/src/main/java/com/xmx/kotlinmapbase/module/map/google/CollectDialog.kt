@@ -57,13 +57,13 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
         // 填充描述框
         mCollection?.apply { editContent.setText(mContent) }
         // 设置类型相关事件
-        if (collectionTypeManager.getTypeList().isNotEmpty()) {
-            val list = collectionTypeManager.getTypeList()
+        if (mapConstantsManager.getTypeList().isNotEmpty()) {
+            val list = mapConstantsManager.getTypeList()
             if (type.isNullOrEmpty()) {
                 // 默认显示第一种类型
-                type = collectionTypeManager.getTypeList()[0]
+                type = mapConstantsManager.getTypeList()[0]
             }
-            imgType.setImageResource(collectionTypeManager.getIconId(type!!)!!)
+            imgType.setImageResource(mapConstantsManager.getIconId(type!!)!!)
             // 点击类型图标
             imgType.setOnClickListener {
                 // 弹出选择类型对话框
@@ -74,7 +74,7 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                             // 获取选择的类型
                             type = list[i]
                             // 更改选择的图标
-                            val iconId = collectionTypeManager.getIconId(type!!)
+                            val iconId = mapConstantsManager.getIconId(type!!)
                             imgType.setImageResource(iconId!!)
                         })
                         .setNegativeButton("取消", {
@@ -89,9 +89,9 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
         btnConfirm.setOnClickListener {
             if (type == null) {
                 // 若未设置类型
-                if (collectionTypeManager.getTypeList().isNotEmpty()) {
+                if (mapConstantsManager.getTypeList().isNotEmpty()) {
                     // 设置为默认类型
-                    type = collectionTypeManager.getTypeList()[0]
+                    type = mapConstantsManager.getTypeList()[0]
                 } else {
                     return@setOnClickListener
                 }

@@ -9,9 +9,9 @@ import kotlin.collections.LinkedHashMap
  * Created by The_onE on 2017/3/1.
  * 收藏类型管理，用于将字符串与图标对应，单例对象
  */
-object collectionTypeManager {
+object mapConstantsManager {
     val typeMap = LinkedHashMap<String, Int>()
-    
+
     val colorMap = LinkedHashMap<String, Int>()
 
     init {
@@ -39,7 +39,7 @@ object collectionTypeManager {
             put("I", R.drawable.icon_marki)
             put("J", R.drawable.icon_markj)
         }
-        
+
         colorMap.apply {
             put("黑色", Color.BLACK)
             put("白色", Color.WHITE)
@@ -74,6 +74,18 @@ object collectionTypeManager {
      * @return 颜色代码
      */
     fun getColor(color: String): Int? = colorMap[color]
+
+    /**
+     * 根据颜色代码获取颜色名称
+     * @param[color] 颜色代码
+     */
+    fun findColorName(color: Int): String? {
+        // 找到所有值为该颜色代码的键值对，返回第一个键
+        colorMap.filter { it.value == color }.keys.forEach { return it }
+        // 若未找到则返回空
+        return null
+    }
+
 
     /**
      * 获取颜色名称列表

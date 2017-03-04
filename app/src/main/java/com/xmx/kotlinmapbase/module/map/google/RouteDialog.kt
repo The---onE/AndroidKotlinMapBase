@@ -24,6 +24,23 @@ class RouteDialog(val mContext: Context,
                   val onSuccess: ((Route) -> Unit))
     : DialogFragment() {
     var mColor: String? = null
+    // 是否为修改对话框
+    var mModifyFlag = false
+    // 要修改的收藏
+    var mRoute: Route? = null
+
+    /**
+     * 修改收藏对话框
+     * @param[context] 当前上下文
+     * @param[route] 要修改的路线
+     * @param[onSuccess] 修改成功的操作
+     */
+    constructor(context: Context, route: Route, onSuccess: ((Route) -> Unit))
+            : this(context, route.mStart, route.mEnd, onSuccess) {
+        mModifyFlag = true
+        mRoute = route
+        mColor = mapConstantsManager.findColorName(route.mColor)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.dialog_route, container)
@@ -33,13 +50,18 @@ class RouteDialog(val mContext: Context,
         super.onViewCreated(view, savedInstanceState)
         // 不显示默认标题栏
         dialog.requestWindowFeature(STYLE_NO_TITLE)
+        mRoute?.apply { editTitle.setText(mTitle) }
         // 默认宽度为10
         editWidth.setText("10")
+        // 如果为修改则显示原宽度
+        mRoute?.apply { editWidth.setText("$mWidth") }
         // 设置颜色相关事件
-        if (collectionTypeManager.getColorList().isNotEmpty()) {
-            val list = collectionTypeManager.getColorList()
-            // 默认显示第一种颜色
-            mColor = collectionTypeManager.getColorList()[0]
+        if (mapConstantsManager.getColorList().isNotEmpty()) {
+            val list = mapConstantsManager.getColorList()
+            if (mColor.isNullOrEmpty()) {
+                // 默认显示第一种颜色
+                mColor = mapConstantsManager.getColorList()[0]
+            }
             txtColor.text = mColor
             // 点击选择颜色
             txtColor.setOnClickListener {
@@ -70,32 +92,54 @@ class RouteDialog(val mContext: Context,
             var color: Int? = null
             if (mColor == null) {
                 // 若未设置颜色
-                if (collectionTypeManager.getColorList().isNotEmpty()) {
+                if (mapConstantsManager.getColorList().isNotEmpty()) {
                     // 设置为默认颜色
-                    mColor = collectionTypeManager.getColorList()[0]
+                    mColor = mapConstantsManager.getColorList()[0]
                 } else {
                     return@setOnClickListener
                 }
             }
-            // 获取选择的颜色代码
-            color = collectionTypeManager.getColor(mColor!!)
-            // 生成路线
-            val route = Route(start, end,
-                    editTitle.text.toString(),
-                    color!!,
-                    editWidth.text.toString().toFloatOrNull() ?: 10f)
-            // 添加路线
-            routeManager.insertToCloud(route,
-                    success = {
-                        user, id ->
-                        // 添加成功
-                        StringUtil.showToast(mContext, "添加成功")
-                        route.cloudId = id
-                        onSuccess(route)
-                        dismiss()
-                    },
-                    error = routeManager.defaultError(mContext),
-                    cloudError = routeManager.defaultCloudError(mContext))
+            if (!mModifyFlag) {
+                // 添加新路线
+                // 获取选择的颜色代码
+                color = mapConstantsManager.getColor(mColor!!)
+                // 生成路线
+                val route = Route(start, end,
+                        editTitle.text.toString(),
+                        color!!,
+                        editWidth.text.toString().toFloatOrNull() ?: 10f)
+                // 添加路线
+                routeManager.insertToCloud(route,
+                        success = {
+                            user, id ->
+                            // 添加成功
+                            StringUtil.showToast(mContext, "添加成功")
+                            route.cloudId = id
+                            onSuccess(route)
+                            dismiss()
+                        },
+                        error = routeManager.defaultError(mContext),
+                        cloudError = routeManager.defaultCloudError(mContext))
+            } else {
+                // 修改路线
+                // 获取选择的颜色代码
+                color = mapConstantsManager.getColor(mColor!!)
+                mRoute?.apply {
+                    mTitle = editTitle.text.toString()
+                    mColor = color!!
+                    mWidth = editWidth.text.toString().toFloatOrNull() ?: mWidth
+                    // 插入带有Cloud Id的实体会覆盖之前的实体
+                    routeManager.insertToCloud(this,
+                            success = {
+                                user, id ->
+                                StringUtil.showToast(mContext, "修改成功")
+                                onSuccess(this)
+                                dismiss()
+                            },
+                            error = routeManager.defaultError(mContext),
+                            cloudError = routeManager.defaultCloudError(mContext))
+                }
+            }
         }
         // 取消
         btnCancel.setOnClickListener {

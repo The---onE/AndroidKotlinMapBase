@@ -1,5 +1,10 @@
 package com.xmx.kotlinmapbase.core.activity
 
+import android.Manifest
+import android.app.AppOpsManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
@@ -21,6 +26,9 @@ import java.util.*
  * 主Activity，利用Fragment展示所有程序内容
  */
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    // 定位权限请求
+    private val LOCATION_REQUEST = 1
 
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_main)
@@ -55,6 +63,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {
+        // 请求定位权限
+        checkLocalPhonePermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST)
+        checkOpsPermission(AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST)
     }
 
     // 侧滑菜单项点击事件
@@ -84,6 +96,17 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             mExitTime = System.currentTimeMillis()
         } else {
             super.onBackPressed()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_REQUEST -> {
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    showToast("您拒绝了定位的权限，无法使用定位功能，请手动允许该权限！")
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.xmx.kotlinmapbase.module.map.google
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.gms.maps.*
@@ -10,6 +11,7 @@ import com.xmx.kotlinmapbase.R
 import com.xmx.kotlinmapbase.common.map.gmap.BaseMapActivity
 import kotlinx.android.synthetic.main.activity_gmap.*
 import android.content.Intent
+import android.location.LocationManager
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import com.google.android.gms.maps.model.Marker
@@ -45,6 +47,10 @@ class GMapActivity : BaseMapActivity() {
     }
 
     override fun initMap(map: GoogleMap?) {
+        // 请求一次定位，唤起小米定位权限请求
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
         map?.apply {
             // 开启定位
             isMyLocationEnabled = true

@@ -40,6 +40,9 @@ class GMapActivity : BaseMapActivity() {
     // 当前选中地图线
     var selectedPolyline: Polyline? = null
 
+    // 收藏管理器
+    var cManager = collectionManager
+
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_gmap)
         // 加载地图对象，设置回调
@@ -272,7 +275,7 @@ class GMapActivity : BaseMapActivity() {
                 .setPositiveButton(R.string.confirm, {
                     deleteDialog, _ ->
                     // 删除收藏
-                    collectionManager.deleteFromCloud(collection.cloudId,
+                    cManager.deleteFromCloud(collection.cloudId,
                             success = {
                                 // 删除成功
                                 showToast(R.string.delete_success)
@@ -281,8 +284,8 @@ class GMapActivity : BaseMapActivity() {
                                 btnEditCollection.visibility = GONE
                                 deleteDialog.dismiss()
                             },
-                            error = collectionManager.defaultError(this@GMapActivity),
-                            cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                            error = cManager.defaultError(this@GMapActivity),
+                            cloudError = cManager.defaultCloudError(this@GMapActivity)
                     )
                 })
                 .setNeutralButton(R.string.cancel, {
@@ -347,8 +350,8 @@ class GMapActivity : BaseMapActivity() {
                                 btnEditRoute.visibility = GONE
                                 dialog.dismiss()
                             },
-                            error = collectionManager.defaultError(this@GMapActivity),
-                            cloudError = collectionManager.defaultCloudError(this@GMapActivity)
+                            error = cManager.defaultError(this@GMapActivity),
+                            cloudError = cManager.defaultCloudError(this@GMapActivity)
                     )
                 })
                 .setNeutralButton(R.string.cancel, {
@@ -360,7 +363,7 @@ class GMapActivity : BaseMapActivity() {
 
     override fun processLogic(savedInstanceState: Bundle?) {
         // 查询所有收藏
-        collectionManager.selectAll(
+        cManager.selectAll(
                 success = {
                     list ->
                     list.forEach {
@@ -377,8 +380,8 @@ class GMapActivity : BaseMapActivity() {
                         }
                     }
                 },
-                error = collectionManager.defaultError(this),
-                cloudError = collectionManager.defaultCloudError(this)
+                error = cManager.defaultError(this),
+                cloudError = cManager.defaultCloudError(this)
         )
         // 查询所有路线
         routeManager.selectAll(

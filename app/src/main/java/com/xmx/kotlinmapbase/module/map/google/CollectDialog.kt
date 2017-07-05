@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.gms.maps.model.LatLng
 import com.xmx.kotlinmapbase.R
+import com.xmx.kotlinmapbase.common.map.gmap.ICollectionManager
 import com.xmx.kotlinmapbase.common.map.gmap.collection.Collection
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
 import com.xmx.kotlinmapbase.utils.StringUtil
@@ -30,6 +31,9 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
     var mModifyFlag = false
     // 要修改的收藏
     var mCollection: Collection? = null
+
+    // 收藏管理器
+    var cManager = collectionManager
 
     /**
      * 修改收藏对话框
@@ -102,7 +106,7 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                 val col = Collection(position, editTitle.text.toString(),
                         type!!, editContent.text.toString())
                 // 添加收藏
-                collectionManager.insertToCloud(col,
+                cManager.insertToCloud(col,
                         success = {
                             user, id ->
                             StringUtil.showToast(mContext, "收藏成功")
@@ -110,8 +114,8 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                             onSuccess(col)
                             dismiss()
                         },
-                        error = collectionManager.defaultError(mContext),
-                        cloudError = collectionManager.defaultCloudError(mContext)
+                        error = cManager.defaultError(mContext),
+                        cloudError = cManager.defaultCloudError(mContext)
                 )
             } else {
                 // 修改收藏
@@ -120,15 +124,15 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
                     this.mType = type!!
                     mContent = editContent.text.toString()
                     // 插入带有Cloud Id的实体会覆盖之前的实体
-                    collectionManager.insertToCloud(this,
+                    cManager.insertToCloud(this,
                             success = {
                                 user, id ->
                                 StringUtil.showToast(mContext, "修改成功")
                                 onSuccess(this)
                                 dismiss()
                             },
-                            error = collectionManager.defaultError(mContext),
-                            cloudError = collectionManager.defaultCloudError(mContext))
+                            error = cManager.defaultError(mContext),
+                            cloudError = cManager.defaultCloudError(mContext))
                 }
             }
         }

@@ -39,6 +39,9 @@
             android:name=".core.activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".core.activity.SettingActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".module.log.OperationLogActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

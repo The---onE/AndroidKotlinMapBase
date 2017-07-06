@@ -74,6 +74,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         // 显示选择的选项卡
         when (item.itemId) {
             R.id.nav_home -> viewPager.currentItem = 0
+            R.id.nav_setting -> startActivity(SettingActivity::class.java)
         }
         // 关闭侧边栏
         drawer_layout.closeDrawer(GravityCompat.START)

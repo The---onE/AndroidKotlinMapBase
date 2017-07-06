@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.gms.maps.model.LatLng
 import com.xmx.kotlinmapbase.R
+import com.xmx.kotlinmapbase.common.data.dataManager
+import com.xmx.kotlinmapbase.common.map.gmap.collection.IRouteManager
 import com.xmx.kotlinmapbase.common.map.gmap.route.routeManager
 import com.xmx.kotlinmapbase.common.map.gmap.route.Route
 import com.xmx.kotlinmapbase.utils.StringUtil
@@ -29,6 +31,8 @@ class RouteDialog(val mContext: Context,
     // 要修改的收藏
     var mRoute: Route? = null
 
+    val rManager:IRouteManager<Route> = routeManager
+
     /**
      * 修改收藏对话框
      * @param[context] 当前上下文
@@ -40,6 +44,7 @@ class RouteDialog(val mContext: Context,
         mModifyFlag = true
         mRoute = route
         mColor = mapConstantsManager.findColorName(route.mColor)
+        rManager.changeTable(dataManager.routeTableName)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -109,7 +114,7 @@ class RouteDialog(val mContext: Context,
                         color!!,
                         editWidth.text.toString().toFloatOrNull() ?: 10f)
                 // 添加路线
-                routeManager.insertToCloud(route,
+                rManager.insertToCloud(route,
                         success = {
                             user, id ->
                             // 添加成功
@@ -118,8 +123,8 @@ class RouteDialog(val mContext: Context,
                             onSuccess(route)
                             dismiss()
                         },
-                        error = routeManager.defaultError(mContext),
-                        cloudError = routeManager.defaultCloudError(mContext))
+                        error = rManager.defaultError(mContext),
+                        cloudError = rManager.defaultCloudError(mContext))
             } else {
                 // 修改路线
                 // 获取选择的颜色代码
@@ -129,15 +134,15 @@ class RouteDialog(val mContext: Context,
                     mColor = color!!
                     mWidth = editWidth.text.toString().toFloatOrNull() ?: mWidth
                     // 插入带有Cloud Id的实体会覆盖之前的实体
-                    routeManager.insertToCloud(this,
+                    rManager.insertToCloud(this,
                             success = {
                                 user, id ->
                                 StringUtil.showToast(mContext, "修改成功")
                                 onSuccess(this)
                                 dismiss()
                             },
-                            error = routeManager.defaultError(mContext),
-                            cloudError = routeManager.defaultCloudError(mContext))
+                            error = rManager.defaultError(mContext),
+                            cloudError = rManager.defaultCloudError(mContext))
                 }
             }
         }

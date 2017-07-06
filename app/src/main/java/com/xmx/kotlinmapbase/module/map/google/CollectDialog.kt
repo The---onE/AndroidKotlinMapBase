@@ -9,8 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.gms.maps.model.LatLng
 import com.xmx.kotlinmapbase.R
-import com.xmx.kotlinmapbase.common.map.gmap.ICollectionManager
+import com.xmx.kotlinmapbase.common.data.dataManager
 import com.xmx.kotlinmapbase.common.map.gmap.collection.Collection
+import com.xmx.kotlinmapbase.common.map.gmap.collection.ICollectionManager
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
 import com.xmx.kotlinmapbase.utils.StringUtil
 import kotlinx.android.synthetic.main.dialog_collect.*
@@ -33,7 +34,7 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
     var mCollection: Collection? = null
 
     // 收藏管理器
-    var cManager = collectionManager
+    var cManager: ICollectionManager<Collection> = collectionManager
 
     /**
      * 修改收藏对话框
@@ -46,6 +47,7 @@ class CollectDialog(val mContext: Context, val position: LatLng, var title: Stri
         mModifyFlag = true
         mCollection = collection
         type = collection.mType
+        cManager.changeTable(dataManager.collectionTableName)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Service
 import android.support.multidex.MultiDexApplication
 import com.avos.avoscloud.AVOSCloud
+import com.xmx.kotlinmapbase.common.data.dataManager
 
 import com.xmx.kotlinmapbase.common.user.userManager
 import java.util.*
@@ -62,5 +63,7 @@ class MyApplication : MultiDexApplication() {
         AVOSCloud.initialize(this, CoreConstants.APP_ID, CoreConstants.APP_KEY)
         // 初始化用户管理器
         userManager.init(this)
+        // 初始化数据管理器
+        dataManager.setContext(this)
     }
 }

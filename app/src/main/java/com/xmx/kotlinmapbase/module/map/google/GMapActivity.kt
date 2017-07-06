@@ -16,7 +16,10 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
+import com.xmx.kotlinmapbase.common.data.dataManager
 import com.xmx.kotlinmapbase.common.map.gmap.collection.Collection
+import com.xmx.kotlinmapbase.common.map.gmap.collection.ICollectionManager
+import com.xmx.kotlinmapbase.common.map.gmap.collection.IRouteManager
 import com.xmx.kotlinmapbase.common.map.gmap.collection.collectionManager
 import com.xmx.kotlinmapbase.common.map.gmap.route.Route
 import com.xmx.kotlinmapbase.common.map.gmap.route.routeManager
@@ -41,7 +44,9 @@ class GMapActivity : BaseMapActivity() {
     var selectedPolyline: Polyline? = null
 
     // 收藏管理器
-    var cManager = collectionManager
+    var cManager: ICollectionManager<Collection> = collectionManager
+    // 路线管理器
+    var rManager: IRouteManager<Route> = routeManager
 
     override fun initView(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_gmap)
@@ -341,7 +346,7 @@ class GMapActivity : BaseMapActivity() {
                 .setPositiveButton(R.string.confirm, {
                     dialog, _ ->
                     // 删除收藏
-                    routeManager.deleteFromCloud(route.cloudId,
+                    rManager.deleteFromCloud(route.cloudId,
                             success = {
                                 // 删除成功
                                 showToast(R.string.delete_success)
@@ -362,6 +367,8 @@ class GMapActivity : BaseMapActivity() {
     }
 
     override fun processLogic(savedInstanceState: Bundle?) {
+        cManager.changeTable(dataManager.collectionTableName)
+        rManager.changeTable(dataManager.routeTableName)
         // 查询所有收藏
         cManager.selectAll(
                 success = {
@@ -384,7 +391,7 @@ class GMapActivity : BaseMapActivity() {
                 cloudError = cManager.defaultCloudError(this)
         )
         // 查询所有路线
-        routeManager.selectAll(
+        rManager.selectAll(
                 success = {
                     list ->
                     list.forEach {
@@ -396,8 +403,8 @@ class GMapActivity : BaseMapActivity() {
                         }
                     }
                 },
-                error = routeManager.defaultError(this),
-                cloudError = routeManager.defaultCloudError(this)
+                error = rManager.defaultError(this),
+                cloudError = rManager.defaultCloudError(this)
         )
     }
 

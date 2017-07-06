@@ -1,4 +1,4 @@
-package com.xmx.kotlinmapbase.common.map.gmap
+package com.xmx.kotlinmapbase.common.map.gmap.collection
 
 import android.content.Context
 import android.widget.Toast
@@ -12,7 +12,9 @@ import com.xmx.kotlinmapbase.utils.ExceptionUtil
  * Created by The_onE on 2017/7/5.
  * 收藏管理器接口
  */
-interface ICollectionManager<Entity : ICloudEntity> {
+interface IRouteManager<Entity : ICloudEntity> {
+    fun changeTable(name: String)
+
     fun insertToCloud(entity: Entity,
                       success: (UserData, String) -> Unit, // 返回当前用户和插入数据ID
                       error: (Int) -> Unit,
